@@ -1,21 +1,26 @@
 local nlua_nvim_lsp = {}
 
-local sumneko_command = function()
-  local cache_location = vim.fn.stdpath('cache')
+--- Returns command to run the language server
+-- @param lsp_path absolute path to the ls folder, defaults to the one used by `:LspInstall``
+local sumneko_command = function(lsp_path)
+  if lsp_path and string.sub(lsp_path, 1, 1) == '~' then
+    lsp_path = vim.fn.expand(lsp_path)
+  end
+  lsp_path = lsp_path or (vim.fn.stdpath('cache') .. '/nvim_lsp/sumneko_lua/lua-language-server')
 
   -- TODO: Need to figure out where these paths are & how to detect max os... please, bug reports
   local bin_location = jit.os
 
   return {
     string.format(
-      "%s/nvim_lsp/sumneko_lua/lua-language-server/bin/%s/lua-language-server",
-      cache_location,
-      bin_location
+      "%s/bin/%s/lua-language-server",
+      lsp_path,
+      jit.os
     ),
     "-E",
     string.format(
-      "%s/nvim/nvim_lsp/sumneko_lua/lua-language-server/main.lua",
-      cache_location
+      "%s/main.lua",
+      lsp_path
     ),
   }
 end
@@ -82,7 +87,7 @@ nlua_nvim_lsp.setup = function(nvim_lsp, config)
     -- Runtime configurations
     filetypes = {"lua"},
 
-    cmd = sumneko_command(),
+    cmd = config.cmd or sumneko_command(config.lsp_path),
 
     on_attach = config.on_attach,
 
