@@ -6,6 +6,7 @@ local sumneko_command = function(lsp_path)
   if lsp_path and string.sub(lsp_path, 1, 1) == '~' then
     lsp_path = vim.fn.expand(lsp_path)
   end
+
   lsp_path = lsp_path or (vim.fn.stdpath('cache') .. '/nvim_lsp/sumneko_lua/lua-language-server')
 
   -- TODO: Need to figure out where these paths are & how to detect max os... please, bug reports
@@ -25,7 +26,7 @@ local sumneko_command = function(lsp_path)
   }
 end
 
-local function get_lua_runtime()
+local function get_lua_runtime(runtime_paths)
     local result = {};
     for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
         local lua_path = path .. "/lua/";
@@ -39,7 +40,14 @@ local function get_lua_runtime()
 
     -- TODO: Figure out how to get these to work...
     --  Maybe we need to ship these instead of putting them in `src`?...
-    result[vim.fn.expand("~/build/neovim/src/nvim/lua")] = true
+    for _, runtime in ipairs(runtime_paths) do
+      -- expand home
+      if string.sub(runtime, 1 , 1) == '~' then
+        runtime = vim.fn.expand(runtime)
+      end
+
+      result[runtime] = true
+    end
 
     return result;
 end
@@ -77,7 +85,7 @@ nlua_nvim_lsp.setup = function(nvim_lsp, config)
         },
 
         workspace = {
-          library = vim.list_extend(get_lua_runtime(), config.library or {}),
+          library = vim.list_extend(get_lua_runtime(config.runtime_paths), config.library or {}),
           maxPreload = 1000,
           preloadFileSize = 1000,
         },
@@ -91,7 +99,7 @@ nlua_nvim_lsp.setup = function(nvim_lsp, config)
 
     on_attach = config.on_attach,
 
-    callbacks = config.callbacks
+    callbacks = config.callbacks,
   })
 end
 
