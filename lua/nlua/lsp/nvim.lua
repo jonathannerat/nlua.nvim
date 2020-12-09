@@ -97,10 +97,8 @@ nlua_nvim_lsp.setup = function(nvim_lsp, config)
     filetypes = {"lua"},
 
     cmd = config.cmd or sumneko_command(config.lsp_path),
-
     on_attach = config.on_attach,
-
-    callbacks = config.callbacks,
+    handlers = config.handlers,
   })
 end
 
