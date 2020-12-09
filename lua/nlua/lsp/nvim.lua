@@ -28,6 +28,7 @@ end
 
 local function get_lua_runtime(runtime_paths)
     local result = {};
+    runtime_paths = runtime_paths or {}
     for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
         local lua_path = path .. "/lua/";
         if vim.fn.isdirectory(lua_path) then
